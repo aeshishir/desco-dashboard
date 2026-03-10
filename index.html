@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>DESCO Electricity Dashboard</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#efefef;
+text-align:center;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px;
+width:900px;
+margin:auto;
+}
+
+.box{
+background:white;
+border:2px solid #888;
+padding:20px;
+height:170px;
+position:relative;
+}
+
+.top-left{
+position:absolute;
+left:15px;
+top:10px;
+font-size:10px;
+font-weight:bold;
+}
+
+.top-right{
+position:absolute;
+right:15px;
+top:10px;
+font-size:10px;
+text-align:right;
+}
+
+.balance{
+font-size:48px;
+font-weight:bold;
+margin-top:40px;
+}
+
+.bottom{
+position:absolute;
+bottom:10px;
+left:15px;
+font-size:10px;
+font-weight:bold;
+text-align:left;
+}
+
+button{
+margin-top:40px;
+padding:12px 50px;
+background:#222;
+color:yellow;
+font-size:20px;
+border-radius:10px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<h2>DESCO Electricity Bill Dashboard</h2>
+
+<div class="grid" id="dashboard"></div>
+
+<button onclick="loadMeters()">Refresh</button>
+
+
+<script>
+
+const meters = [
+
+{ name:"Meter 1", account:"37064951" },
+{ name:"Meter 2", account:"37239912" },
+{ name:"Meter 3", account:"37239913" },
+{ name:"Meter 4", account:"37239914" }
+
+];
+
+
+async function getData(account){
+
+let url="https://prepaid.desco.org.bd/api/customer/getCustomerInfo";
+
+let res = await fetch(url,{
+method:"POST",
+headers:{ "Content-Type":"application/json"},
+body:JSON.stringify({accountNo:account})
+});
+
+let data = await res.json();
+
+return data.data;
+
+}
+
+
+
+async function loadMeters(){
+
+let container=document.getElementById("dashboard");
+
+container.innerHTML="Loading...";
+
+container.innerHTML="";
+
+for(let m of meters){
+
+try{
+
+let d=await getData(m.account);
+
+let balance=parseFloat(d.balance);
+
+let color="green";
+
+if(balance<100) color="red";
+else if(balance<200) color="orange";
+
+let box=`
+
+<div class="box">
+
+<div class="top-left">${m.name}</div>
+
+<div class="top-right">
+A/C No: ${m.account}<br>
+Meter No: ${d.meterNo}
+</div>
+
+<div class="balance" style="color:${color}">
+${balance.toFixed(2)}
+</div>
+
+<div class="bottom">
+Last Recharge: ${d.lastRechargeAmount} BDT<br>
+Recharge time: ${d.lastRechargeTime}
+</div>
+
+</div>
+
+`;
+
+container.innerHTML+=box;
+
+}
+catch{
+
+container.innerHTML+=`<div class="box">Error loading ${m.name}</div>`;
+
+}
+
+}
+
+}
+
+loadMeters()
+
+</script>
+
+
+</body>
+</html>
