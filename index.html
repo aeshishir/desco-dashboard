@@ -1,61 +1,129 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
-  <title>DESCO Balance Dashboard</title>
-  <style>
-    body { font-family: Arial; text-align: center; padding: 50px; background: #f5f5f5; }
-    table { margin: 0 auto; border-collapse: collapse; }
-    th, td { padding: 12px 20px; border: 1px solid #ccc; }
-    th { background-color: #007bff; color: white; }
-    td { background-color: #fff; }
-    h2 { margin-bottom: 30px; }
-  </style>
+<meta charset="UTF-8">
+<title>DESCO Meter Dashboard</title>
+
+<style>
+
+body{
+    font-family:Aptos, Arial, sans-serif;
+    background:#f5f5f5;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:20px;
+}
+
+.box{
+    width:200px;
+    height:140px;
+    background:white;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+}
+
+.t1{
+    font-weight:bold;
+    font-size:10pt;
+    color:black;
+}
+
+.t2{
+    font-weight:bold;
+    font-size:18pt;
+}
+
+.t3{
+    font-weight:400;
+    font-size:10pt;
+    color:rgba(0,0,0,0.9);
+}
+
+.red{color:#d00000;}
+.yellow{color:#e6a800;}
+.green{color:#008a00;}
+
+</style>
 </head>
+
 <body>
 
-<h2>DESCO Prepaid Meter Balances</h2>
+<div class="grid">
 
-<table>
-  <thead>
-    <tr>
-      <th>Account</th>
-      <th>Meter</th>
-      <th>Name</th>
-      <th>Balance (৳)</th>
-    </tr>
-  </thead>
-  <tbody id="balances">
-    <tr><td colspan="4">Loading…</td></tr>
-  </tbody>
-</table>
+<div class="box">
+<div class="t1">Meter 1</div>
+<div class="t2" id="b1">--</div>
+<div class="t3">37064951 / 030110175995</div>
+</div>
+
+<div class="box">
+<div class="t1">Meter 2</div>
+<div class="t2" id="b2">--</div>
+<div class="t3">37239912 / 030110175996</div>
+</div>
+
+<div class="box">
+<div class="t1">Meter 3</div>
+<div class="t2" id="b3">--</div>
+<div class="t3">37239913 / 030110175997</div>
+</div>
+
+<div class="box">
+<div class="t1">Meter 4</div>
+<div class="t2" id="b4">--</div>
+<div class="t3">37239914 / 030110175998</div>
+</div>
+
+</div>
 
 <script>
-async function loadBalances() {
-  try {
-    const res = await fetch("https://desco-proxy.aeshishir-work.workers.dev");
-    const data = await res.json();
 
-    const tbody = document.getElementById("balances");
-    tbody.innerHTML = "";
+async function loadBalances(){
 
-    data.forEach(d => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${d.account}</td>
-        <td>${d.meter}</td>
-        <td>${d.name}</td>
-        <td>৳ ${d.balance}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+const r = await fetch("YOUR_WORKER_URL");
+const data = await r.json();
 
-  } catch (err) {
-    document.getElementById("balances").innerHTML = `<tr><td colspan="4">Error loading balances</td></tr>`;
-  }
+function colorBalance(el,value){
+
+el.innerText=value.toFixed(2);
+
+if(value < 100){
+el.className="t2 red";
+}
+else if(value < 200){
+el.className="t2 yellow";
+}
+else{
+el.className="t2 green";
+}
+
+}
+
+colorBalance(document.getElementById("b1"),data[0].balance);
+colorBalance(document.getElementById("b2"),data[1].balance);
+colorBalance(document.getElementById("b3"),data[2].balance);
+colorBalance(document.getElementById("b4"),data[3].balance);
+
 }
 
 loadBalances();
+
 </script>
 
 </body>
 </html>
+```
