@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DESCO Balance Dashboard</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 50px; background: #f5f5f5; }
+    table { margin: 0 auto; border-collapse: collapse; }
+    th, td { padding: 12px 20px; border: 1px solid #ccc; }
+    th { background-color: #007bff; color: white; }
+    td { background-color: #fff; }
+    h2 { margin-bottom: 30px; }
+  </style>
+</head>
+<body>
+
+<h2>DESCO Prepaid Meter Balances</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Account</th>
+      <th>Meter</th>
+      <th>Name</th>
+      <th>Balance (৳)</th>
+    </tr>
+  </thead>
+  <tbody id="balances">
+    <tr><td colspan="4">Loading…</td></tr>
+  </tbody>
+</table>
+
+<script>
+async function loadBalances() {
+  try {
+    const res = await fetch("https://desco-proxy.aeshishir-work.workers.dev");
+    const data = await res.json();
+
+    const tbody = document.getElementById("balances");
+    tbody.innerHTML = "";
+
+    data.forEach(d => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.account}</td>
+        <td>${d.meter}</td>
+        <td>${d.name}</td>
+        <td>৳ ${d.balance}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    document.getElementById("balances").innerHTML = `<tr><td colspan="4">Error loading balances</td></tr>`;
+  }
+}
+
+loadBalances();
+</script>
+
+</body>
+</html>
