@@ -1,180 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-<title>DESCO Electricity Dashboard</title>
-
-<style>
-
-body{
-font-family:Arial;
-background:#efefef;
-text-align:center;
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:25px;
-width:900px;
-margin:auto;
-}
-
-.box{
-background:white;
-border:2px solid #888;
-padding:20px;
-height:170px;
-position:relative;
-}
-
-.top-left{
-position:absolute;
-left:15px;
-top:10px;
-font-size:10px;
-font-weight:bold;
-}
-
-.top-right{
-position:absolute;
-right:15px;
-top:10px;
-font-size:10px;
-text-align:right;
-}
-
-.balance{
-font-size:48px;
-font-weight:bold;
-margin-top:40px;
-}
-
-.bottom{
-position:absolute;
-bottom:10px;
-left:15px;
-font-size:10px;
-font-weight:bold;
-text-align:left;
-}
-
-button{
-margin-top:40px;
-padding:12px 50px;
-background:#222;
-color:yellow;
-font-size:20px;
-border-radius:10px;
-cursor:pointer;
-}
-
-</style>
-
+  <title>DESCO Balance Dashboard</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 50px; background: #f5f5f5; }
+    table { margin: 0 auto; border-collapse: collapse; }
+    th, td { padding: 12px 20px; border: 1px solid #ccc; }
+    th { background-color: #007bff; color: white; }
+    td { background-color: #fff; }
+    h2 { margin-bottom: 30px; }
+  </style>
 </head>
-
-
 <body>
 
-<h2>DESCO Electricity Bill Dashboard</h2>
+<h2>DESCO Prepaid Meter Balances</h2>
 
-<div class="grid" id="dashboard"></div>
-
-<button onclick="loadMeters()">Refresh</button>
-
+<table>
+  <thead>
+    <tr>
+      <th>Account</th>
+      <th>Meter</th>
+      <th>Name</th>
+      <th>Balance (৳)</th>
+    </tr>
+  </thead>
+  <tbody id="balances">
+    <tr><td colspan="4">Loading…</td></tr>
+  </tbody>
+</table>
 
 <script>
+async function loadBalances() {
+  try {
+    const res = await fetch("https://desco-proxy.aeshishir-work.workers.dev");
+    const data = await res.json();
 
-const meters = [
+    const tbody = document.getElementById("balances");
+    tbody.innerHTML = "";
 
-{ name:"Meter 1", account:"37064951" },
-{ name:"Meter 2", account:"37239912" },
-{ name:"Meter 3", account:"37239913" },
-{ name:"Meter 4", account:"37239914" }
+    data.forEach(d => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.account}</td>
+        <td>${d.meter}</td>
+        <td>${d.name}</td>
+        <td>৳ ${d.balance}</td>
+      `;
+      tbody.appendChild(tr);
+    });
 
-];
-
-
-async function getData(account){
-
-let url="https://desco-proxy.aeshishir-work.workers.dev/";
-
-let res = await fetch(url,{
-method:"POST",
-headers:{ "Content-Type":"application/json"},
-body:JSON.stringify({accountNo:account})
-});
-
-let data = await res.json();
-
-return data.data;
-
+  } catch (err) {
+    document.getElementById("balances").innerHTML = `<tr><td colspan="4">Error loading balances</td></tr>`;
+  }
 }
 
-
-
-async function loadMeters(){
-
-let container=document.getElementById("dashboard");
-
-container.innerHTML="Loading...";
-
-container.innerHTML="";
-
-for(let m of meters){
-
-try{
-
-let d=await getData(m.account);
-
-let balance=parseFloat(d.balance);
-
-let color="green";
-
-if(balance<100) color="red";
-else if(balance<200) color="orange";
-
-let box=`
-
-<div class="box">
-
-<div class="top-left">${m.name}</div>
-
-<div class="top-right">
-A/C No: ${m.account}<br>
-Meter No: ${d.meterNo}
-</div>
-
-<div class="balance" style="color:${color}">
-${balance.toFixed(2)}
-</div>
-
-<div class="bottom">
-Last Recharge: ${d.lastRechargeAmount} BDT<br>
-Recharge time: ${d.lastRechargeTime}
-</div>
-
-</div>
-
-`;
-
-container.innerHTML+=box;
-
-}
-catch{
-
-container.innerHTML+=`<div class="box">Error loading ${m.name}</div>`;
-
-}
-
-}
-
-}
-
-loadMeters()
-
+loadBalances();
 </script>
-
 
 </body>
 </html>
